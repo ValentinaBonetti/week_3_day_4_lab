@@ -9,11 +9,12 @@ class Movie
     @id = options['id'].to_i if options['id']
     @title = options['title']
     @genre = options['genre']
+    @budget = options['budget']
   end
 
   def save()
-    sql = "INSERT INTO movies (title, genre) VALUES ($1, $2) RETURNING id"
-    values = [@title, @genre]
+    sql = "INSERT INTO movies (title, genre, budget) VALUES ($1, $2, $3) RETURNING id"
+    values = [@title, @genre, @budget]
     movie = SqlRunner.run(sql, values).first
     @id = movie['id'].to_i
   end
@@ -44,20 +45,34 @@ def self.delete_all()
   SqlRunner.run(sql, values)
 end
 
+def check_budget()
+  sql = "SELECT fee FROM stars INNER JOIN castings ON castings.star_id = stars.id WHERE movie_id = $1"
+values = [@id]
+result = SqlRunner.run(sql, values)
+fee_array = result.map {|fee_hash| fee_hash["fee"].to_i}
+total = 0
+for fee in fee_array
+  total += fee
+end
+remaining_budget = @budget - total
+return remaining_budget
+end
+
 def update()
 sql = "UPDATE movies
   SET
   (
     title,
-    genre
+    genre,
+    budget
 
 
   ) =
   (
-    $1, $2
+    $1, $2, $3
   )
-  WHERE id = $3"
-values = [@title, @genre, @id]
+  WHERE id = $4"
+values = [@title, @genre, @budget, @id]
 SqlRunner.run(sql, values)
 end
 
