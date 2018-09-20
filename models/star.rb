@@ -18,6 +18,36 @@ attr_accessor :first_name, :last_name
     @id = star['id'].to_i
   end
 
+  def update()
+  sql = "UPDATE stars
+    SET
+    (
+      first_name,
+      last_name
+
+
+    ) =
+    (
+      $1, $2
+    )
+    WHERE id = $3"
+  values = [@first_name, @last_name, @id]
+  SqlRunner.run(sql, values)
+  end
+
+  def movies()
+  sql = "SELECT movies.* FROM movies INNER JOIN castings ON castings.movie_id = movies.id WHERE star_id = $1"
+  values = [@id]
+  result = SqlRunner.run(sql, values)
+  return result.map {|movie| Movie.new(movie)}
+  end
+
+  def delete()
+    sql = "DELETE FROM stars WHERE id = $1"
+    values = [@id]
+    SqlRunner.run(sql,values)
+  end
+
   def self.all()
   sql = "SELECT * FROM stars"
   values = []
@@ -31,21 +61,8 @@ def self.delete_all()
   SqlRunner.run(sql, values)
 end
 
-def update()
-sql = "UPDATE stars
-  SET
-  (
-    first_name,
-    last_name
 
 
-  ) =
-  (
-    $1, $2
-  )
-  WHERE id = $3"
-values = [@first_name, @last_name, @id]
-SqlRunner.run(sql, values)
-end
+
 
 end

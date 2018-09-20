@@ -18,6 +18,19 @@ class Movie
     @id = movie['id'].to_i
   end
 
+  def stars()
+    sql = "SELECT stars.* FROM stars INNER JOIN castings ON castings.star_id = stars.id WHERE movie_id = $1"
+    values = [@id]
+    result = SqlRunner.run(sql, values)
+    return result.map{|star| Star.new(star)}
+  end
+
+  def delete()
+    sql = "DELETE FROM movies WHERE id = $1"
+    values = [@id]
+    SqlRunner.run(sql,values)
+  end
+
   def self.all()
   sql = "SELECT * FROM movies"
   values = []
